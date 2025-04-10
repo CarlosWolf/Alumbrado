@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Prueba de Postes</title>
+    <style>
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+
+        #leyenda {
+            position: absolute;
+            background: white;
+            padding: 10px;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+            box-shadow: 0 0 10px #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="leyenda">
+        <p><strong>Leyenda:</strong></p>
+        <p>🟢 Poste funcionando</p>
+        <p>🔴 Poste con falla</p>
+        <p><em>Haz clic en un poste para cambiar su estado.</em></p>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        const postes = [
+            { id: 1, numero: 1, lat: 18.5036, lng: -88.3050, estado: 'activo' },
+            { id: 2, numero: 2, lat: 18.5037, lng: -88.3053, estado: 'activo' },
+            { id: 3, numero: 3, lat: 18.5038, lng: -88.3056, estado: 'fallando' }
+        ];
+        const marcadores = [];
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 18.5037, lng: -88.3052 },
+                zoom: 18,
+            });
+
+            postes.forEach((poste, index) => {
+                const marcador = new google.maps.Marker({
+                    position: { lat: poste.lat, lng: poste.lng },
+                    map: map,
+                    label: `${poste.numero}`,
+                    icon: getIcon(poste.estado),
+                    title: `Poste #${poste.numero}`
+                });
+
+                marcador.addListener("click", () => {
+                    // Cambia el estado
+                    poste.estado = poste.estado === "activo" ? "fallando" : "activo";
+                    marcador.setIcon(getIcon(poste.estado));
+                });
+
+                marcadores.push(marcador);
+            });
+        }
+
+        function getIcon(estado) {
+            return {
+                url: estado === "activo"
+                    ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                    : "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                scaledSize: new google.maps.Size(32, 32),
+            };
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxDnoc4y6qF1ui5YOCV7V2agyTskMWnyg&callback=initMap">
+    </script>
+</body>
+
+</html>

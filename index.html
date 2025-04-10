@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Postes arrastrables - Úrsulo Galván, Chetumal</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+
+        .marker-poste {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px #0005;
+        }
+
+        #leyenda {
+            position: absolute;
+            top: 10px;
+            left: 60px;
+            background: white;
+            padding: 10px;
+            z-index: 1000;
+            box-shadow: 0 0 10px #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="leyenda">
+        <p><strong>Leyenda:</strong></p>
+        <p>🟢 Poste funcionando</p>
+        <p>🔴 Poste con falla</p>
+        <p><em>Arrastra los postes para ajustarlos sobre la calle.</em></p>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const postes = [
+            { id: 1, numero: 1, lat: 18.534025, lng: -88.304713, estado: 'activo' },
+            { id: 2, numero: 2, lat: 18.534050, lng: -88.304700, estado: 'activo' },
+            { id: 3, numero: 3, lat: 18.534075, lng: -88.304687, estado: 'fallando' }
+        ];
+
+        const map = L.map('map').setView([18.534025, -88.304713], 18);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        function crearIcono(poste) {
+            const color = poste.estado === 'activo' ? 'green' : 'red';
+            const div = document.createElement('div');
+            div.className = 'marker-poste';
+            div.style.backgroundColor = color;
+            div.textContent = poste.numero;
+            return L.divIcon({
+                html: div,
+                iconSize: [30, 30],
+                className: ''
+            });
+        }
+
+        postes.forEach((poste) => {
+            const marker = L.marker([poste.lat, poste.lng], {
+                icon: crearIcono(poste),
+                draggable: true
+            }).addTo(map);
+
+            marker.on('click', () => {
+                poste.estado = poste.estado === 'activo' ? 'fallando' : 'activo';
+                marker.setIcon(crearIcono(poste));
+            });
+
+            marker.on('dragend', (e) => {
+                const nuevaPos = e.target.getLatLng();
+                poste.lat = nuevaPos.lat;
+                poste.lng = nuevaPos.lng;
+                console.log(`Poste ${poste.numero} nueva posición:`, poste.lat, poste.lng);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
